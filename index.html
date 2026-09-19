@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Venice & Greece — Jet Lag Plan</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Jet Lag Plan">
+<meta name="theme-color" content="#F3EEE3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style id="css">
+:root{
+  --bg:#F3EEE3; --paper:#F8F4EC; --ink:#2B2823; --ink-soft:#645C51; --rule:#D8CFBD;
+  --accent:#5C6B4F; --tag-bg:#E3D9C4; --tag-ink:#5A4B2E; --done:#8A8072; --toast-bg:#2B2823; --toast-ink:#F3EEE3;
+}
+:root[data-theme="eve"]{
+  --bg:#2A2724; --paper:#332F2B; --ink:#D9D2C5; --ink-soft:#A39B8D; --rule:#4A443D;
+  --accent:#B8925A; --tag-bg:#3E3831; --tag-ink:#D9C7A6; --done:#8C8478; --toast-bg:#D9D2C5; --toast-ink:#2A2724;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,sans-serif;font-size:17px;line-height:1.55;transition:background .4s,color .4s}
+.wrap{max-width:680px;margin:0 auto;padding:24px 18px 80px}
+h1{font-weight:700;margin:0 0 10px;font-size:clamp(28px,6vw,38px);line-height:1.1;margin:0 0 10px}
+.hero{display:flex;align-items:center;gap:16px;margin:0 0 10px}
+.lede{color:var(--ink-soft);margin:0 0 18px;max-width:58ch}
+.progress{display:flex;align-items:center;gap:12px;margin:0 0 22px}
+.bar{flex:1;height:8px;background:var(--rule);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+.progress b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.shift{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:14px 16px;margin-bottom:26px;font-size:15px}
+.shift p{margin:0 0 10px}.shift p:last-child{margin:0}
+.wakerow label{font-weight:700}
+.wakerow select,.wakerow input{font:inherit;padding:5px 9px;border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);margin:4px 0;max-width:100%}
+.wakerow .hint{display:block;font-size:14px;color:var(--ink-soft)}
+.modes{display:inline-flex;border:1px solid var(--rule);border-radius:8px;overflow:hidden;margin:4px 0;vertical-align:middle}
+.modes button{font:inherit;font-size:14px;padding:5px 11px;border:0;background:transparent;color:var(--ink);cursor:pointer}
+.modes button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.eve-note{display:none;font-size:14px;color:var(--ink-soft)}
+:root[data-theme="eve"] .eve-note{display:block}
+.phase{font-size:21px;font-weight:700;margin:34px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--accent)}
+.day{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:14px 16px 6px;margin-bottom:14px}
+.day.complete{opacity:.7}
+.day header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:4px}
+.day h3{margin:0;font-size:17px;font-weight:700}
+.day .when{font-size:14px;color:var(--ink-soft);white-space:nowrap}
+.day .note{font-size:15px;color:var(--ink-soft);margin:0 0 8px}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--rule)}
+li label{flex:1;cursor:pointer}
+li input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--accent);flex:none;cursor:pointer}
+li.done label{text-decoration:line-through;color:var(--done)}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:1px 8px;border-radius:99px;margin-right:6px;vertical-align:1px;background:var(--tag-bg);color:var(--tag-ink)}
+.time{font-weight:700;font-variant-numeric:tabular-nums}
+.status{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-ink);font-size:14px;padding:6px 12px;border-radius:99px;opacity:0;transition:opacity .2s;pointer-events:none}
+.status.show{opacity:1}
+.extras{background:var(--paper);border:1px solid var(--rule);border-radius:14px;padding:14px 16px;margin-top:10px;font-size:15px}
+.extras h4{margin:10px 0 4px;font-size:16px}.extras h4:first-child{margin-top:0}
+.extras p{margin:0 0 6px;color:var(--ink-soft)}
+input:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){ .bar i,body{transition:none} }
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<div class="status" id="status"></div>
+<script type="application/json" id="state">{"done":{},"ship":"unknown"}</script>
+<script id="app">
+const SHIPS = {
+ unknown:{label:"Not sure yet — ask on board", when:"Ship time (TBD)",
+  note26:"Greece is 1 hour ahead of Italy. Ships often keep the departure port's time or change overnight — ask, then set it at the top of this page.",
+  ask26:"Ask guest services whether the ship changes clocks to Greek time and when, then set \"Ship's clock\" at the top of this page.",
+  night26:"If the ship advances 1 hour tonight, don't overthink it — just wake at your normal clock time tomorrow.",
+  ports:"Check the daily program for whether all-aboard times are in ship time or local port time.",
+  note30:"Coming home is a 6–7 hour move west depending on the ship's clock.",
+  note2:"If the ship was on Greek time, clocks go back 1 hour to Italy today — the direction you want anyway.",
+  wake2:"Wake around {{8:30 AM}}–{{9:00 AM}} Venice time."},
+ venice:{label:"Venice time (CEST) all cruise", when:"Ship = Venice time",
+  note26:"The ship stays on Venice time for the whole cruise. Greek ports run 1 hour ahead of the ship's clock, but your body only has to track one clock — the one you already adjusted to.",
+  ask26:"Turn off automatic time zone on your phone and watch and set them to Venice time so they don't jump ahead in Greek ports.",
+  night26:"No clock change tonight. Same wake time tomorrow.",
+  ports:"All-aboard times are ship (Venice) time. Port clocks, shops and tour operators read 1 hour later — when a local says 4 PM, that's 3 PM ship time.",
+  note30:"Coming home is a 6-hour move west from Venice time.",
+  note2:"No clock change coming off the ship — you're already on Venice time.",
+  wake2:"Wake around {{8:30 AM}}–{{9:00 AM}}, 1–2 hours later than your cruise norm."},
+ greece:{label:"Greek time (EEST) while cruising", when:"Ship = Greek time",
+  note26:"The ship switches to Greek time, 1 hour ahead of Venice. It's one easy hour east; treat it like a tiny version of the first flight.",
+  ask26:"Turn off automatic time zone on your phone and watch; set them to Greek time when the ship announces the change so they don't flip back and forth.",
+  night26:"The clock jumps ahead 1 hour tonight. Go to bed 30–60 minutes earlier by the old clock, then wake at your normal ship-clock time tomorrow and get straight into morning light.",
+  ports:"Ship clock matches the ports — all-aboard times need no conversion.",
+  note30:"Coming home is a 7-hour move west from Greek time (6 from Venice).",
+  note2:"Clocks go back 1 hour to Italy today — the direction you want anyway, so it counts as free progress.",
+  wake2:"Wake around {{8:30 AM}}–{{9:00 AM}} Venice time (that's {{9:30 AM}}–{{10:00 AM}} by yesterday's ship clock)."}
+};
+let SHIP = SHIPS.unknown;
+function buildDays(){ return [
+ {phase:"Before you fly — nudge your clock 2–3 hours toward Venice"},
+ {id:"sun20", title:"Sunday, Sept 20", when:"Home (ET)", note:"Start moving your body clock east.", tasks:[
+  ["sleep","Wake at {{6:00 AM}} (1 hour early)."],
+  ["light","Within 10 minutes of waking, get outside for 20–30 minutes — no sunglasses. Morning light is the strongest tool you have."],
+  ["caf","Coffee only before {{12:00 PM}}."],
+  ["go","Move dinner earlier (by {{6:00 PM}}). Skip alcohol tonight."],
+  ["light","After {{8:00 PM}}: dim the lights, phone on night mode, no bright screens."],
+  ["sleep","Lights out by {{10:00 PM}} (1 hour early)."],
+  ["go","Optional: ask your doctor about low-dose melatonin (0.5 mg) around {{6:30 PM}} tonight and tomorrow; it helps eastward shifts when taken early evening, not at bedtime."]
+ ]},
+ {id:"mon21", title:"Monday, Sept 21", when:"Home (ET)", tasks:[
+  ["sleep","Wake at {{5:00 AM}} (2 hours early)."],
+  ["light","Outside for 20–30 minutes right after waking."],
+  ["caf","Coffee before {{11:00 AM}} only."],
+  ["go","Pack the jet-lag kit: sunglasses, eye mask, earplugs or noise-cancelling headphones, refillable water bottle, compression socks, EU plug adapters (Italy type C/F/L, Greece type C/F)."],
+  ["go","Confirm passport is valid 3+ months past Oct 3, and check whether ETIAS authorization is now required for US travelers to the EU."],
+  ["light","Dim lights after {{7:00 PM}}."],
+  ["sleep","Lights out by {{9:00 PM}}."]
+ ]},
+ {id:"tue22", title:"Tuesday, Sept 22 — Fly to Venice", when:"ATL → VCE overnight", note:"Assumes an early-evening departure from Atlanta landing in Venice the next morning. Venice is 6 hours ahead.", tasks:[
+  ["sleep","Wake at {{4:30 AM}}–{{5:00 AM}}."],
+  ["light","Outside light for 30 minutes after waking. Get a walk in — you'll be sitting for 9+ hours."],
+  ["caf","Last coffee by {{10:00 AM}}. None on the plane."],
+  ["go","Hydrate all day: 16 oz water every 2–3 hours. No alcohol from now through landing."],
+  ["go","Eat a real dinner at the airport before boarding, so you can skip or nibble the in-flight meal and sleep sooner."],
+  ["go","At boarding, set your watch and phone to Venice time. From now on you live on Venice time."],
+  ["sleep","Eye mask, earplugs, socks. Sleep as soon as possible after takeoff (it's already past midnight in Venice). Aim for 5–6 hours."],
+  ["light","Keep your window shade down and screens dim if you wake early; don't watch movies through the night."]
+ ]},
+ {phase:"In Venice — lock in the new clock"},
+ {id:"wed23", title:"Wednesday, Sept 23 — Land in Venice", when:"Venice (CEST)", note:"Your body thinks it's the middle of the night when you land. The rule today: shade in the morning, sun after.", tasks:[
+  ["light","Sunglasses on from the plane until {{11:00 AM}} local. Early-morning light today would push your clock the wrong way."],
+  ["light","{{11:00 AM}} – {{3:00 PM}}: be outside as much as possible — walk the city, sit at a canal-side café. This is the most important light of the whole trip."],
+  ["caf","One coffee is fine in the late morning. None after {{2:00 PM}}."],
+  ["go","Eat lunch and dinner on the local clock, even if you're not hungry. Keep both light."],
+  ["sleep","If you must nap: 20–30 minutes max, before {{3:00 PM}}, alarm set."],
+  ["go","Expect fingerprint and photo at passport control (EU Entry/Exit System)."],
+  ["sleep","Stay up until at least {{10:00 PM}} local. Bed by {{11:00 PM}}."]
+ ]},
+ {id:"thu24", title:"Thursday, Sept 24", when:"Venice (CEST)", tasks:[
+  ["sleep","Wake by {{7:30 AM}} — set an alarm, don't sleep in."],
+  ["light","Sunglasses until {{9:30 AM}}, then 30+ minutes outside between {{10:00 AM}} and {{1:00 PM}}."],
+  ["caf","Coffee mornings only, cutoff {{2:00 PM}}."],
+  ["go","Move: a long walk or the Rialto stairs count. Exercise speeds the shift."],
+  ["sleep","No naps today if you can help it. Bed {{10:00 PM}}–{{11:00 PM}}."]
+ ]},
+ {id:"fri25", title:"Friday, Sept 25", when:"Venice (CEST)", note:"You should feel mostly adjusted. Today is about holding the schedule and prepping for the ship.", tasks:[
+  ["sleep","Wake by {{7:30 AM}}."],
+  ["light","Morning light is fine now — get outside within an hour of waking."],
+  ["caf","Coffee cutoff {{2:00 PM}}."],
+  ["go","Cruise prep: passports, boarding docs, seasickness remedy if you use one, sunscreen, hat, ship power adapters (most ships have US outlets — check your line)."],
+  ["go","Download offline maps and translate for Greek ports; confirm your phone's international plan covers Italy and Greece."],
+  ["sleep","Bed {{10:00 PM}}–{{11:00 PM}}. Early boarding tomorrow."]
+ ]},
+ {phase:"On the ship — Greece is one more hour ahead"},
+ {id:"sat26", title:"Saturday, Sept 26 — Board the ship", when:"Venice → Greece", note:SHIP.note26, tasks:[
+  ["go",SHIP.ask26],
+  ["light","Morning light on deck before boarding chaos: 20 minutes outside."],
+  ["caf","Coffee cutoff {{2:00 PM}} ship time."],
+  ["go","Locate your cabin's outlets and the medical center; note the ship's Wi-Fi and daily program."],
+  ["sleep",SHIP.night26]
+ ]},
+ {id:"sea", title:"Sunday, Sept 27 – Tuesday, Sept 29 — Cruising Greece", when:SHIP.when, note:"Same rhythm every day. Tick this once per day.", tasks:[
+  ["go",SHIP.ports],
+  ["sleep","Consistent wake time ({{7:00 AM}}–{{8:00 AM}} ship time), even on sea days."],
+  ["light","Morning on deck or ashore: 20–30 minutes of daylight before {{10:00 AM}}."],
+  ["caf","Coffee cutoff {{2:00 PM}}."],
+  ["go","Sunscreen and water on port days — Greek sun in late September is still strong. Dehydration feels a lot like jet lag."],
+  ["sleep","Naps allowed now: 20–30 minutes, before {{3:00 PM}}."]
+ ]},
+ {phase:"Last 3 days — start drifting back west"},
+ {id:"wed30", title:"Wednesday, Sept 30", when:SHIP.when, note:SHIP.note30+" Westward is easier: you delay your clock by staying up later and seeking evening light.", tasks:[
+  ["sleep","Sleep in until {{7:45 AM}} if you can."],
+  ["light","Sunglasses until {{9:00 AM}}. Get your daylight in the afternoon instead."],
+  ["light","Be outside for sunset and stay in bright areas of the ship until {{10:00 PM}}."],
+  ["caf","Coffee allowed until {{3:00 PM}} now."],
+  ["sleep","Bed 1 hour later than usual ({{11:30 PM}}–{{12:00 AM}})."]
+ ]},
+ {id:"thu1", title:"Thursday, Oct 1", when:SHIP.when, tasks:[
+  ["sleep","Wake around {{8:00 AM}} (1 hour later than your ship norm)."],
+  ["light","Sunglasses until {{10:00 AM}}; bright light late afternoon and evening."],
+  ["caf","Coffee allowed until {{3:00 PM}}."],
+  ["go","Pack tonight so tomorrow is calm. Set out travel outfit, docs, chargers."],
+  ["sleep","Bed {{12:00 AM}} or later."]
+ ]},
+ {id:"fri2", title:"Friday, Oct 2 — Back in Venice", when:"Venice (CEST)", note:SHIP.note2, tasks:[
+  ["sleep",SHIP.wake2],
+  ["light","Sunglasses until {{10:00 AM}}. Evening walk in the light until dark."],
+  ["caf","Coffee allowed until {{3:00 PM}}."],
+  ["go","Check in online for tomorrow's flight; confirm airport transfer time (allow 3 hours for the international flight)."],
+  ["sleep","Bed by {{12:00 AM}} — you need a decent night before a long day."]
+ ]},
+ {phase:"Flying home — stay awake, chase the afternoon light"},
+ {id:"sat3", title:"Saturday, Oct 3 — Fly Venice → Atlanta", when:"VCE → ATL daytime", note:"Assumes a late-morning departure landing in Atlanta mid-afternoon ET. You gain 6 hours; today is a very long day, and that's the plan.", tasks:[
+  ["sleep","Wake at your normal time — no earlier."],
+  ["caf","Coffee at the airport and again mid-flight. Last cup by {{2:00 PM}} Atlanta time."],
+  ["light","Window shade up. Stay awake the whole flight; if you fold, cap it at 20 minutes."],
+  ["go","At takeoff, set your watch to Atlanta time. Eat lunch on the plane at Atlanta lunchtime (noon–1 PM ET)."],
+  ["go","Water every 2 hours, walk the aisle hourly, no alcohol."],
+  ["light","After landing, get outside until sunset (about 7:15 PM in Atlanta). A walk beats sitting on the couch."],
+  ["go","Light, early dinner at home. Unpack tomorrow, not tonight."],
+  ["sleep","Stay up until at least {{9:30 PM}}. Bed {{9:30 PM}}–{{10:30 PM}}. If you wake at 3 AM, stay in bed in the dark; don't check your phone."]
+ ]},
+ {phase:"Recovery — 2 days to normal"},
+ {id:"sun4", title:"Sunday, Oct 4", when:"Home (ET)", note:"You'll wake early — that's expected. Light timing today keeps you from bouncing back to European time.", tasks:[
+  ["sleep","If you wake before {{6:00 AM}}, stay in bed until then. Up by {{8:00 AM}} at the latest."],
+  ["light","Sunglasses or indoors until {{8:30 AM}}. Then outside mid-morning and again in the late afternoon."],
+  ["caf","Coffee morning only, cutoff {{1:00 PM}}."],
+  ["sleep","No nap longer than 20 minutes, and not after {{2:00 PM}}."],
+  ["light","Bright evening light until {{8:00 PM}}; bed {{10:00 PM}}–{{11:00 PM}}."]
+ ]},
+ {id:"mon5", title:"Monday, Oct 5", when:"Home (ET)", tasks:[
+  ["sleep","Wake at your normal time ({{7:00 AM}}) with an alarm."],
+  ["light","Normal morning light is fine again — 20 minutes outside before work."],
+  ["caf","Back to your usual coffee routine."],
+  ["sleep","Bed at your normal time. If you're still foggy Tuesday, one more day of the same fixes it."]
+ ]}
+]; }
+let DAYS = buildDays();
+
+const EXTRAS = `
+<h4>Why the light rules flip</h4>
+<p>Light before your body's lowest temperature point (about 2 hours before your natural wake time) delays your clock; light after it advances the clock. Going east you want advances, so you avoid early light and seek late-morning sun. Coming west you want delays, so you avoid early light and seek evening sun. Sunglasses are the tool for "avoid."</p>
+<h4>If someone in the family takes daily medication</h4>
+<p>Ask their pharmacist how to move the dose time across a 6-hour shift; most can slide 1–2 hours a day rather than jumping all at once.</p>
+<h4>Time zones on this trip</h4>
+<p>Atlanta ET (UTC−4) · Venice CEST (UTC+2, 6 hours ahead) · Greece EEST (UTC+3, 7 hours ahead). No daylight-saving changes fall inside these dates.</p>
+<h4>Simple rules if the checklist gets lost</h4>
+<p>Live on destination time from the moment you board. Sun in the late morning going east, sun in the evening coming home. Coffee before 2 PM, alcohol never on the plane, naps 20 minutes or not at all.</p>`;
+
+function render(){
+  SHIP = SHIPS[state.ship] || SHIPS.unknown; DAYS = buildDays();
+  const total = DAYS.filter(d=>d.tasks).reduce((n,d)=>n+d.tasks.length,0);
+  const doneN = Object.values(state.done).filter(Boolean).length;
+  let h = `<div class="hero"><svg viewBox="0 0 96 96" width="72" height="72" aria-hidden="true">
+   <circle cx="48" cy="48" r="46" fill="#F2A541"/>
+   <circle cx="48" cy="38" r="15" fill="#FFF1D6"/>
+   <path d="M6 66 Q20 58 34 66 T62 66 T90 66 L90 96 L6 96 Z" fill="#3F6E6A"/>
+   <path d="M6 76 Q20 68 34 76 T62 76 T90 76" fill="none" stroke="#E9EEEA" stroke-width="3"/>
+   <path d="M28 64 L68 64 L62 74 L34 74 Z" fill="#2B2823"/>
+   <rect x="36" y="54" width="24" height="10" rx="2" fill="#F8F4EC"/>
+   <rect x="44" y="46" width="8" height="8" rx="1" fill="#F8F4EC"/>
+   <circle cx="42" cy="59" r="1.6" fill="#2B2823"/><circle cx="48" cy="59" r="1.6" fill="#2B2823"/><circle cx="54" cy="59" r="1.6" fill="#2B2823"/>
+  </svg><h1>Venice &amp; Greece<br>jet lag plan</h1></div>
+  <p class="lede">Sept 22 – Oct 3, 2026. Wake times, light, coffee and sleep for every day, before and after the flights, built around your own wake-up time. Check things off as you go. Your wake time, ship setting and checks are saved on this phone, so each person keeps their own list — tap Share, then Add to Home Screen to keep it handy.</p>
+  <div class="progress"><div class="bar"><i style="width:${total?Math.round(doneN/total*100):0}%"></i></div><b>${doneN} / ${total}</b></div>
+    <div class="shift"><p><strong>The whole plan in one line:</strong> shift 2–3 hours east before you fly, finish the shift in Venice with late-morning sun, drift back west over the last three days at sea, then chase the afternoon light in Atlanta.</p>
+  <p class="wakerow"><label for="wake">Choose your normal wake-up time at home:</label> <select id="wake">${wakeOptions()}</select> <span class="hint">Every time below is built from this (currently ${wakeLabel()}). It's saved on your device, so each family member can set their own.</span></p>
+  <p class="wakerow"><label for="ship">Ship's clock during the cruise:</label> <select id="ship">${Object.entries(SHIPS).map(([k,v])=>`<option value="${k}"${state.ship===k?' selected':''}>${v.label}</option>`).join('')}</select> <span class="hint">Ask guest services on boarding day. Rewrites the cruise days and the trip home.</span></p>
+  <p class="wakerow"><label>Screen colors:</label> <span class="modes" role="group" aria-label="Screen colors">${[['auto','Auto'],['day','Day'],['eve','Evening']].map(([k,l])=>`<button type="button" data-mode="${k}" aria-pressed="${mode===k}">${l}</button>`).join('')}</span> <span class="hint">Auto follows your wake time: warm, dim colors from ${fmt(20*60+offsetMin())} until ${wakeLabel()}, and during the sunglasses window on landing day. Saved on your device.</span><span class="eve-note">Evening mode: the page can't dim your screen. Turn brightness down and switch on your phone's night-light setting.</span></p></div>`;
+  for(const d of DAYS){
+    if(d.phase){ h += `<h2 class="phase">${d.phase}</h2>`; continue; }
+    const allDone = d.tasks.every((t,i)=>state.done[d.id+'-'+i]);
+    h += `<section class="day${allDone?' complete':''}"><header><h3>${d.title}</h3><span class="when">${d.when}</span></header>`;
+    if(d.note) h += `<p class="note">${shift(d.note)}</p>`;
+    h += '<ul>';
+    d.tasks.forEach((t,i)=>{
+      const id = d.id+'-'+i, on = !!state.done[id];
+      const label = {light:'Light',sleep:'Sleep',caf:'Coffee',go:'Do'}[t[0]];
+      h += `<li class="${on?'done':''}"><input type="checkbox" id="${id}" data-id="${id}" ${on?'checked':''}><label for="${id}"><span class="tag ${t[0]}">${label}</span>${shift(t[1])}</label></li>`;
+    });
+    h += '</ul></section>';
+  }
+  h += `<h2 class="phase">Good to know</h2><div class="extras">${EXTRAS}</div>`;
+  document.getElementById('root').innerHTML = h;
+}
+
+let timer = null;
+function toast(msg, ms){ const s=document.getElementById('status'); s.textContent=msg; s.classList.add('show'); clearTimeout(s._t); s._t=setTimeout(()=>s.classList.remove('show'), ms||1500); }
+
+function save(){
+  try{ localStorage.setItem('jl-state', JSON.stringify(state)); toast('Saved on this device'); }
+  catch(e){ toast('Could not save — your browser is blocking storage', 3000); }
+}
+
+document.addEventListener('change', e=>{
+  if(e.target && e.target.id==='wake'){ wake = e.target.value || '07:00'; try{ localStorage.setItem('jl-wake', wake); }catch(x){} applyTheme(); render(); return; }
+  if(e.target && e.target.id==='ship'){ state.ship = e.target.value; render(); clearTimeout(timer); timer=setTimeout(save,300); return; }
+    const id = e.target && e.target.dataset && e.target.dataset.id; if(!id) return;
+  state.done[id] = e.target.checked; if(!e.target.checked) delete state.done[id];
+  render();
+  clearTimeout(timer); timer = setTimeout(save, 300);
+});
+
+document.addEventListener('click', e=>{
+  const b = e.target.closest && e.target.closest('button[data-mode]'); if(!b) return;
+  mode = b.dataset.mode; try{ localStorage.setItem('jl-mode', mode); }catch(x){} applyTheme(); render();
+});
+applyTheme(); setInterval(applyTheme, 60000);
+render();
+</script>
+</body>
+</html>
